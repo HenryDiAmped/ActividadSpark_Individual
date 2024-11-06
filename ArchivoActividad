@@ -1,0 +1,30 @@
+from pyspark.sql import SparkSession
+from pyspark.sql.functions import col, expr, mean, corr
+
+spark = SparkSession.builder.appName("Individual").getOrCreate()
+
+spark
+
+df1 = spark.read.csv("datos1.csv", header=True, inferSchema = True)
+
+df1.show()
+
+df2 = spark.read.csv("datos2.csv", header=True, inferSchema = True)
+
+df2.show()
+
+df1.select(mean(col("Calificaciones")).alias("Media")).show()
+
+media = df1.select(mean(col("Calificaciones")).alias("Media")).collect()[0]["Media"]
+moda = df1.groupBy("Calificaciones").count().orderBy(col("count").desc()).first()
+mediana = df1.approxQuantile("Calificaciones",[0.5],0.0)
+
+print("la media es", media)
+
+print("la moda es", moda["Calificaciones"])
+
+print("la mediana es", mediana)
+
+correlacion = df2.select(corr(col("var1"),col("var2")).alias("correlacion")).collect()[0]["correlacion"]
+
+print("la correlacion es:", correlacion)
